@@ -3,7 +3,7 @@ from .views import (
     LeadViewSet, LeadStageViewSet, ActivityViewSet, 
     ReminderViewSet, UserViewSet, CustomFieldViewSet, CampaignViewSet,
     LeadDocumentViewSet, IntegrationViewSet, WorkflowViewSet, WorkflowLogViewSet,
-    CallRecordViewSet
+    CallRecordViewSet, InternalTaskViewSet
 )
 from rest_framework.routers import DefaultRouter
 
@@ -20,5 +20,6 @@ router.register(r'integrations', IntegrationViewSet, basename='integration')
 router.register(r'workflows', WorkflowViewSet, basename='workflow')
 router.register(r'workflow-logs', WorkflowLogViewSet, basename='workflow-log')
 router.register(r'call-records', CallRecordViewSet, basename='call-record')
+router.register(r'internal-tasks', InternalTaskViewSet, basename='internal-task')
 
 urlpatterns = router.urls

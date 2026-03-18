@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+from django.db.models import Q
 
 class LeadStage(models.Model):
     name = models.CharField(max_length=100)
@@ -228,5 +230,44 @@ class CallRecord(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+class InternalTask(models.Model):
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('critical', 'Critical'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('ongoing', 'Ongoing'),
+        ('completed', 'Completed'),
+        ('overdue', 'Overdue'),
+    ]
+    CATEGORY_CHOICES = [
+        ('finance', 'Finance'),
+        ('hr', 'HR'),
+        ('ops', 'Operations'),
+        ('it', 'IT'),
+        ('marketing', 'Marketing'),
+        ('legal', 'Legal'),
+        ('admin', 'General Admin'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_internal_tasks')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_internal_tasks')
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='admin')
+    due_date = models.DateTimeField()
+    notes = models.TextField(blank=True, null=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
 
 from .models_integrations import IntegrationSetting

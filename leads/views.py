@@ -3,23 +3,25 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import (
     Lead, LeadStage, CustomField, Activity, Reminder, Campaign, 
-    LeadDocument, LeadAuditLog, Workflow, WorkflowLog, CallRecord
+    LeadDocument, LeadAuditLog, Workflow, WorkflowLog, CallRecord, InternalTask
 )
 from .models_integrations import IntegrationSetting
 from .serializers import (
     LeadSerializer, LeadStageSerializer, ActivitySerializer, 
     ReminderSerializer, UserSerializer, CustomFieldSerializer, CampaignSerializer,
     LeadDocumentSerializer, IntegrationSettingSerializer, LeadAuditLogSerializer,
-    WorkflowSerializer, WorkflowLogSerializer, CallRecordSerializer
+    WorkflowSerializer, WorkflowLogSerializer, CallRecordSerializer, InternalTaskSerializer
 )
 from .utils_automation import process_workflows, summarize_lead_activities
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum, Count, F
+from django.utils import timezone
 
 class LeadViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
-        role = getattr(user, 'profile', None).role if hasattr(user, 'profile') else 'agent'
+        profile = getattr(user, 'profile', None)
+        role = profile.role if profile else 'agent'
         
         # Super Admins and Managers see everything, Agents only their own + campaign work
         if role in ['admin', 'manager']:
@@ -154,9 +156,9 @@ class LeadViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def pipeline_stats(self, request):
-        from django.db.models import Sum, Count, F
         user = self.request.user
-        role = getattr(user, 'profile', None).role if hasattr(user, 'profile') else 'agent'
+        profile = getattr(user, 'profile', None)
+        role = profile.role if profile else 'agent'
         
         # Breakdown by Stage
         stages = LeadStage.objects.all()
@@ -298,7 +300,8 @@ class CustomFieldViewSet(viewsets.ModelViewSet):
 class CampaignViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
-        role = getattr(user, 'profile', None).role if hasattr(user, 'profile') else 'agent'
+        profile = getattr(user, 'profile', None)
+        role = profile.role if profile else 'agent'
         
         if role in ['admin', 'manager']:
             return Campaign.objects.all()
@@ -370,3 +373,82 @@ class CallRecordViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class InternalTaskViewSet(viewsets.ModelViewSet):
+    serializer_class = InternalTaskSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        profile = getattr(user, 'profile', None)
+        role = profile.role if profile else 'agent'
+        
+        # Super Admins and Managers see everything, Agents only their assigned tasks
+        if role in ['admin', 'manager']:
+            queryset = InternalTask.objects.all()
+        else:
+            queryset = InternalTask.objects.filter(
+                Q(assigned_to=user) | Q(created_by=user)
+            ).distinct()
+            
+        # Filtering
+        status = self.request.query_params.get('status')
+        priority = self.request.query_params.get('priority')
+        category = self.request.query_params.get('category')
+        
+        if status:
+            queryset = queryset.filter(status=status)
+        if priority:
+            queryset = queryset.filter(priority=priority)
+        if category:
+            queryset = queryset.filter(category=category)
+            
+        return queryset.order_by('-due_date')
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def daily_briefing(self, request):
+        print(f"DEBUG: Generating Daily Briefing for user: {request.user.username}")
+        now = timezone.now()
+        
+        # Get pending/ongoing tasks assigned to user
+        tasks = InternalTask.objects.filter(
+            assigned_to=request.user, 
+            status__in=['pending', 'ongoing']
+        ).order_by('-priority', 'due_date')
+        
+        task_count = tasks.count()
+        if task_count == 0:
+            return Response({
+                'briefing': f"Good morning, {request.user.username}! You have a clear schedule today. This is a great opportunity to focus on long-term goals or clear your inbox.",
+                'task_count': 0
+            })
+            
+        # Prioritize critical/high tasks
+        urgent_tasks = tasks.filter(priority__in=['critical', 'high'])
+        main_task = urgent_tasks.first() or tasks.first()
+        
+        time_diff = main_task.due_date - now
+        due_text = "due soon"
+        if time_diff.days < 0:
+            due_text = "overdue"
+        elif time_diff.seconds < 3600 * 3:
+            due_text = "due in less than 3 hours"
+            
+        briefing = f"Good morning, {request.user.username}. You have {task_count} tasks assigned to you today. "
+        briefing += f"I recommend starting with **'{main_task.title}'** as it's a {main_task.priority} priority task and is {due_text}. "
+        
+        # Check for bottlenecks
+        overdue_count = tasks.filter(due_date__lt=now).count()
+        if overdue_count > 0:
+            briefing += f"You have {overdue_count} overdue task(s) that should be addressed immediately to stay on track."
+        else:
+            briefing += "Your current timeline looks manageable if you tackle the top item first."
+            
+        return Response({
+            'briefing': briefing,
+            'task_count': task_count,
+            'main_task_id': main_task.id
+        })

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import (
     Lead, LeadStage, CustomField, LeadCustomFieldValue, 
     Activity, Reminder, Campaign, LeadDocument, LeadAuditLog,
-    Workflow, WorkflowLog, CallRecord
+    Workflow, WorkflowLog, CallRecord, InternalTask
 )
 from .models_integrations import IntegrationSetting
 
@@ -166,4 +166,14 @@ class WorkflowLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkflowLog
         fields = '__all__'
+
+class InternalTaskSerializer(serializers.ModelSerializer):
+    assigned_to_name = serializers.ReadOnlyField(source='assigned_to.username')
+    created_by_name = serializers.ReadOnlyField(source='created_by.username')
+    is_overdue = serializers.ReadOnlyField()
+
+    class Meta:
+        model = InternalTask
+        fields = '__all__'
+        read_only_fields = ['created_by', 'is_overdue']
 
