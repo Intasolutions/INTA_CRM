@@ -48,7 +48,10 @@ def execute_workflow_action(lead, workflow, user=None):
 
     elif action_type == 'create_task':
         note = data.get('note', 'Auto-generated follow-up')
-        delay_hours = data.get('delay_hours', 24)
+        try:
+            delay_hours = int(data.get('delay_hours', 24))
+        except (ValueError, TypeError):
+            delay_hours = 24
         
         # Priority for task assignment: 
         # 1. Assigned agent, 2. Triggering user, 3. First admin

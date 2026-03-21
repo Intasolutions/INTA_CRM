@@ -190,13 +190,16 @@ class LeadViewSet(viewsets.ModelViewSet):
             })
             
         # Breakdown by Source
-        sources = base_leads.values('lead_source').annotate(count=Count('id'), value=Sum('deal_value'))
+        sources = list(base_leads.values('lead_source').annotate(count=Count('id'), value=Sum('deal_value')))
+        
+        # Ensure 'Closed Won' count is case insensitive or defaults to 0 safely
+        won_leads = base_leads.filter(Q(stage__name__iexact='Closed Won') | Q(stage__name__iexact='Won'))
         
         return Response({
             'stage_breakdown': stage_breakdown,
             'source_breakdown': sources,
-            'total_forecasted_revenue': total_forecasted,
-            'won_leads_count': base_leads.filter(stage__name='Closed Won').count()
+            'total_forecasted_revenue': float(total_forecasted),
+            'won_leads_count': won_leads.count()
         })
 
     @action(detail=True, methods=['get'])
@@ -410,9 +413,18 @@ class InternalTaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def daily_briefing(self, request):
-        print(f"DEBUG: Generating Daily Briefing for user: {request.user.username}")
         now = timezone.now()
-        
+        # Basic timezone heuristic for greeting (if profile has no TZ, use server time)
+        hour = now.hour
+        if 5 <= hour < 12:
+            greeting = "Good morning"
+        elif 12 <= hour < 17:
+            greeting = "Good afternoon"
+        elif 17 <= hour < 22:
+            greeting = "Good evening"
+        else:
+            greeting = "Good night"
+
         # Get pending/ongoing tasks assigned to user
         tasks = InternalTask.objects.filter(
             assigned_to=request.user, 
@@ -422,7 +434,7 @@ class InternalTaskViewSet(viewsets.ModelViewSet):
         task_count = tasks.count()
         if task_count == 0:
             return Response({
-                'briefing': f"Good morning, {request.user.username}! You have a clear schedule today. This is a great opportunity to focus on long-term goals or clear your inbox.",
+                'briefing': f"{greeting}, {request.user.username}! You have a clear schedule. This is a great opportunity to focus on long-term goals or clear your inbox.",
                 'task_count': 0
             })
             
@@ -437,7 +449,7 @@ class InternalTaskViewSet(viewsets.ModelViewSet):
         elif time_diff.seconds < 3600 * 3:
             due_text = "due in less than 3 hours"
             
-        briefing = f"Good morning, {request.user.username}. You have {task_count} tasks assigned to you today. "
+        briefing = f"{greeting}, {request.user.username}. You have {task_count} tasks assigned to you. "
         briefing += f"I recommend starting with **'{main_task.title}'** as it's a {main_task.priority} priority task and is {due_text}. "
         
         # Check for bottlenecks
