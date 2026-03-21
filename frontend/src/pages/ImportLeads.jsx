@@ -25,6 +25,18 @@ const ImportLeads = () => {
   const [csvData, setCsvData] = useState([]);
   const [mapping, setMapping] = useState({});
   const [duplicateStrategy, setDuplicateStrategy] = useState('skip');
+
+  useEffect(() => {
+    // Restore from session storage if available
+    const savedData = sessionStorage.getItem('import_csv_data');
+    const savedHeaders = sessionStorage.getItem('import_csv_headers');
+    const savedMapping = sessionStorage.getItem('import_mapping');
+    if (savedData && savedHeaders) {
+      setCsvData(JSON.parse(savedData));
+      setHeaders(JSON.parse(savedHeaders));
+      if (savedMapping) setMapping(JSON.parse(savedMapping));
+    }
+  }, []);
   const [systemFields, setSystemFields] = useState([
     { id: 'name', label: 'Lead Name', required: true },
     { id: 'email', label: 'Email Address', required: false },
@@ -63,6 +75,10 @@ const ImportLeads = () => {
             setHeaders(cleanedHeaders);
             setCsvData(results.data);
             
+            // Persist to session storage to avoid data loss on refresh
+            sessionStorage.setItem('import_csv_data', JSON.stringify(results.data));
+            sessionStorage.setItem('import_csv_headers', JSON.stringify(cleanedHeaders));
+            
             // Intelligence: Try to auto-map based on common synonyms
             const initialMapping = {};
             systemFields.forEach(sf => {
@@ -97,7 +113,9 @@ const ImportLeads = () => {
   };
 
   const handleMappingChange = (sysFieldId, csvHeader) => {
-    setMapping({ ...mapping, [sysFieldId]: csvHeader });
+    const newMapping = { ...mapping, [sysFieldId]: csvHeader };
+    setMapping(newMapping);
+    sessionStorage.setItem('import_mapping', JSON.stringify(newMapping));
   };
 
   const getMappedPreview = () => {
