@@ -130,10 +130,14 @@ const ImportLeads = () => {
       return lead;
     });
 
-    console.log('📦 Prepared Mapped Leads:', mappedLeads.length, mappedLeads);
+    console.log('📦 Final Data Check:', {
+      csvRows: csvData.length,
+      mappedLeads: mappedLeads.length,
+      sample: mappedLeads[0]
+    });
 
     if (mappedLeads.length === 0) {
-      toast.error('No leads found to import. Please check your mapping.');
+      toast.error('The CRM has no data to send! Please re-upload your CSV file.');
       setLoading(false);
       return;
     }
@@ -143,8 +147,8 @@ const ImportLeads = () => {
         leads: mappedLeads,
         strategy: duplicateStrategy
       });
-
-      console.log('✅ Import Result:', res.data);
+      
+      console.log('✅ Server Response:', res.data);
 
       setImportStatus({
         total: mappedLeads.length,
