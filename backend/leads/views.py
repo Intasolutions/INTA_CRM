@@ -118,13 +118,18 @@ class LeadViewSet(viewsets.ModelViewSet):
         leads_data = request.data.get('leads', [])
         strategy = request.data.get('strategy', 'skip')
         
-        results = {'created': 0, 'updated': 0, 'skipped': 0, 'errors': []}
+        results = {'created': 0, 'updated': 0, 'skipped': 0, 'error_count': 0, 'errors': []}
         
         # Get default stage if not provided
         default_stage = LeadStage.objects.order_by('order').first()
         
         for data in leads_data:
             email = data.get('email')
+            # Treat common filler values as None to prevent false duplicate matches
+            if email and str(email).lower().strip() in ['', 'na', 'n/a', 'none', 'null']:
+                email = None
+                data['email'] = None # Clean the data for saving
+                
             existing_lead = Lead.objects.filter(email=email).first() if email else None
             
             # Ensure stage is present or use default
@@ -150,6 +155,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                 else:
                     results['created'] += 1
             else:
+                results['error_count'] += 1
                 results['errors'].append({'data': data, 'errors': serializer.errors})
         
         return Response(results)

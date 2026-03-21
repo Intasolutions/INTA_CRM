@@ -32,7 +32,7 @@ const ImportLeads = () => {
     { id: 'company', label: 'Company Name', required: false },
     { id: 'lead_source', label: 'Lead Source', required: false }
   ]);
-  const [importStatus, setImportStatus] = useState({ total: 0, completed: 0, skipped: 0, errors: [] });
+  const [importStatus, setImportStatus] = useState({ total: 0, completed: 0, skipped: 0, error_count: 0, errors: [] });
   const [loading, setLoading] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState('');
@@ -135,12 +135,13 @@ const ImportLeads = () => {
         leads: mappedLeads,
         strategy: duplicateStrategy
       });
-      setImportStatus({
-        total: mappedLeads.length,
-        completed: res.data.created + res.data.updated,
-        skipped: res.data.skipped,
-        errors: res.data.errors
-      });
+        setImportStatus({
+          total: mappedLeads.length,
+          completed: res.data.created + res.data.updated,
+          skipped: res.data.skipped,
+          error_count: res.data.error_count || res.data.errors?.length || 0,
+          errors: res.data.errors
+        });
     } catch (err) {
       console.error(err);
       setImportStatus(prev => ({ ...prev, errors: [{ message: 'Import failed: Server error' }] }));
@@ -375,7 +376,11 @@ const ImportLeads = () => {
                     </div>
                     <div>
                       <div style={{ fontSize: '24px', fontWeight: '800' }}>{importStatus.skipped}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Skipped/Duplicates</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Skipped</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: importStatus.error_count > 0 ? 'var(--danger)' : 'inherit' }}>{importStatus.error_count}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Errors</div>
                     </div>
                   </div>
                   <button className="btn-primary" style={{ padding: '14px 48px' }} onClick={() => navigate('/leads')}>View Imported Data</button>
