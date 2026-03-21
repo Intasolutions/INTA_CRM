@@ -382,7 +382,7 @@ const ImportLeads = () => {
                   <h2 style={{ marginBottom: '12px' }}>Batch Import Complete</h2>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '40px' }}>
                     <div>
-                      <div style={{ fontSize: '24px', fontWeight: '800' }}>{importStatus.completed}</div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--success)' }}>{importStatus.completed}</div>
                       <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Successful</div>
                     </div>
                     <div>
@@ -394,6 +394,19 @@ const ImportLeads = () => {
                       <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Errors</div>
                     </div>
                   </div>
+
+                  {importStatus.errors && importStatus.errors.length > 0 && (
+                    <div style={{ textAlign: 'left', background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '12px', marginBottom: '24px', maxHeight: '150px', overflowY: 'auto' }}>
+                      <h4 style={{ fontSize: '13px', color: 'var(--danger)', marginBottom: '8px' }}>Error Details:</h4>
+                      {importStatus.errors.slice(0, 5).map((err, i) => (
+                        <div key={i} style={{ fontSize: '11px', marginBottom: '4px' }}>
+                          Row Mapping: {JSON.stringify(err.errors)}
+                        </div>
+                      ))}
+                      {importStatus.errors.length > 5 && <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>...and {importStatus.errors.length - 5} more errors</div>}
+                    </div>
+                  )}
+
                   <button className="btn-primary" style={{ padding: '14px 48px' }} onClick={() => navigate('/leads')}>View Imported Data</button>
                 </>
                )}
