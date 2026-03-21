@@ -140,13 +140,19 @@ class LeadViewSet(viewsets.ModelViewSet):
                 data.pop('id', None)
                 
                 email = data.get('email')
+                phone = data.get('phone')
                 # Treat common filler values as None to prevent false duplicate matches
                 if email and str(email).lower().strip() in ['', 'na', 'n/a', 'none', 'null']:
                     email = None
                     data['email'] = None # Clean the data for saving
-                    
-                existing_lead = Lead.objects.filter(email=email).first() if email else None
                 
+                # Try to find existing lead by email OR phone
+                existing_lead = None
+                if email:
+                    existing_lead = Lead.objects.filter(email=email).first()
+                if not existing_lead and phone:
+                    existing_lead = Lead.objects.filter(phone=phone).first()
+                    
                 # Ensure stage is present or use default
                 if not data.get('stage') and default_stage:
                     data['stage'] = default_stage.id
