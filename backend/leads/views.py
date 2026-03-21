@@ -181,7 +181,9 @@ class LeadViewSet(viewsets.ModelViewSet):
                         results['errors'].append({'data': data, 'errors': serializer.errors})
                 except Exception as save_error:
                     print(f"FAILED TO SAVE LEAD DATA: {data}")
-                    raise save_error
+                    # Log the error but CONTINUE to the next lead
+                    results['error_count'] += 1
+                    results['errors'].append({'data': data, 'error': str(save_error)})
             
             return Response(results)
         except Exception as e:
