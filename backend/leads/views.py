@@ -115,50 +115,63 @@ class LeadViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def bulk_import(self, request):
-        leads_data = request.data.get('leads', [])
-        strategy = request.data.get('strategy', 'skip')
-        
-        results = {'created': 0, 'updated': 0, 'skipped': 0, 'error_count': 0, 'errors': []}
-        
-        # Get default stage if not provided
-        default_stage = LeadStage.objects.order_by('order').first()
-        
-        for data in leads_data:
-            email = data.get('email')
-            # Treat common filler values as None to prevent false duplicate matches
-            if email and str(email).lower().strip() in ['', 'na', 'n/a', 'none', 'null']:
-                email = None
-                data['email'] = None # Clean the data for saving
-                
-            existing_lead = Lead.objects.filter(email=email).first() if email else None
+        try:
+            leads_data = request.data.get('leads', [])
+            strategy = request.data.get('strategy', 'skip')
             
-            # Ensure stage is present or use default
-            if not data.get('stage') and default_stage:
-                data['stage'] = default_stage.id
-                
-            if existing_lead:
-                if strategy == 'skip':
-                    results['skipped'] += 1
-                    continue
-                elif strategy == 'overwrite':
-                    serializer = self.get_serializer(existing_lead, data=data, partial=True)
-                else:
-                    results['skipped'] += 1
-                    continue
-            else:
-                serializer = self.get_serializer(data=data)
+            print(f"🕵️‍♂️ BULK IMPORT: Received {len(leads_data)} leads. Strategy: {strategy}")
             
-            if serializer.is_valid():
-                serializer.save()
+            results = {'created': 0, 'updated': 0, 'skipped': 0, 'error_count': 0, 'errors': []}
+            
+            # Get default stage if not provided
+            default_stage = LeadStage.objects.order_by('order').first()
+            
+            for data in leads_data:
+                email = data.get('email')
+                # Treat common filler values as None to prevent false duplicate matches
+                if email and str(email).lower().strip() in ['', 'na', 'n/a', 'none', 'null']:
+                    email = None
+                    data['email'] = None # Clean the data for saving
+                    
+                existing_lead = Lead.objects.filter(email=email).first() if email else None
+                
+                # Ensure stage is present or use default
+                if not data.get('stage') and default_stage:
+                    data['stage'] = default_stage.id
+                    
                 if existing_lead:
-                    results['updated'] += 1
+                    if strategy == 'skip':
+                        results['skipped'] += 1
+                        continue
+                    elif strategy == 'overwrite':
+                        serializer = self.get_serializer(existing_lead, data=data, partial=True)
+                    else:
+                        results['skipped'] += 1
+                        continue
                 else:
-                    results['created'] += 1
-            else:
-                results['error_count'] += 1
-                results['errors'].append({'data': data, 'errors': serializer.errors})
-        
-        return Response(results)
+                    serializer = self.get_serializer(data=data)
+                
+                if serializer.is_valid():
+                    serializer.save()
+                    if existing_lead:
+                        results['updated'] += 1
+                    else:
+                        results['created'] += 1
+                else:
+                    results['error_count'] += 1
+                    results['errors'].append({'data': data, 'errors': serializer.errors})
+            
+            return Response(results)
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            print(f"❌ BULK IMPORT CRASHED: {str(e)}")
+            print(error_trace)
+            return Response({
+                'error': str(e),
+                'traceback': error_trace,
+                'created': 0, 'updated': 0, 'skipped': 0, 'error_count': 0, 'errors': [str(e)]
+            }, status=500)
     
     @action(detail=False, methods=['get'])
     def pipeline_stats(self, request):

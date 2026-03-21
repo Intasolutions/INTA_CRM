@@ -329,7 +329,10 @@ const ImportLeads = () => {
           {currentStep === 3 && (
             <motion.div key="s3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ width: '100%', textAlign: 'center' }}>
                <AlertTriangle size={48} color="var(--brand-blue)" style={{ marginBottom: '24px' }} />
-               <h2 style={{ marginBottom: '32px' }}>Duplicate Resolution Strategy</h2>
+               <h2 style={{ marginBottom: '12px' }}>Duplicate Resolution Strategy</h2>
+               <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontWeight: 'bold' }}>
+                 📦 {csvData.length} Leads detected and ready for processing.
+               </p>
                
                <div className="grid-equal" style={{ gap: '20px', marginBottom: '40px' }}>
                 <div 
