@@ -128,6 +128,9 @@ class LeadViewSet(viewsets.ModelViewSet):
             default_stage = LeadStage.objects.order_by('order').first()
             
             for data in leads_data:
+                # IMPORTANT: Remove any 'id' field to prevent UNIQUE constraint collisions
+                data.pop('id', None)
+                
                 email = data.get('email')
                 # Treat common filler values as None to prevent false duplicate matches
                 if email and str(email).lower().strip() in ['', 'na', 'n/a', 'none', 'null']:
