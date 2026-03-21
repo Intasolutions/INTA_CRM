@@ -119,7 +119,8 @@ class LeadViewSet(viewsets.ModelViewSet):
             leads_data = request.data.get('leads', [])
             strategy = request.data.get('strategy', 'skip')
             
-            print(f"🕵️‍♂️ BULK IMPORT: Received {len(leads_data)} leads. Strategy: {strategy}")
+            # Simple log without emojis to be safe on Windows consoles
+            print(f"BULK IMPORT: Received {len(leads_data)} leads. Strategy: {strategy}")
             
             results = {'created': 0, 'updated': 0, 'skipped': 0, 'error_count': 0, 'errors': []}
             
@@ -165,7 +166,7 @@ class LeadViewSet(viewsets.ModelViewSet):
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
-            print(f"❌ BULK IMPORT CRASHED: {str(e)}")
+            print(f"BULK IMPORT CRASHED: {str(e)}")
             print(error_trace)
             return Response({
                 'error': str(e),
