@@ -163,26 +163,36 @@ class LeadViewSet(viewsets.ModelViewSet):
                 else:
                     serializer = self.get_serializer(data=data)
                 
-                if serializer.is_valid():
-                    serializer.save()
-                    if existing_lead:
-                        results['updated'] += 1
+                try:
+                    if serializer.is_valid():
+                        serializer.save()
+                        if existing_lead:
+                            results['updated'] += 1
+                        else:
+                            results['created'] += 1
                     else:
-                        results['created'] += 1
-                else:
-                    results['error_count'] += 1
-                    results['errors'].append({'data': data, 'errors': serializer.errors})
+                        results['error_count'] += 1
+                        results['errors'].append({'data': data, 'errors': serializer.errors})
+                except Exception as save_error:
+                    print(f"FAILED TO SAVE LEAD DATA: {data}")
+                    raise save_error
             
             return Response(results)
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
+            # Include the data dict in the response if possible
+            last_data = locals().get('data', 'No data available')
             print(f"BULK IMPORT CRASHED: {str(e)}")
+            print(f"Last data item: {last_data}")
             print(error_trace)
             return Response({
                 'error': str(e),
                 'traceback': error_trace,
-                'created': 0, 'updated': 0, 'skipped': 0, 'error_count': 0, 'errors': [str(e)]
+                'failing_data': last_data,
+                'created': results['created'], 'updated': results['updated'], 
+                'skipped': results['skipped'], 'error_count': results['error_count'], 
+                'errors': [str(e)]
             }, status=500)
     
     @action(detail=False, methods=['get'])
