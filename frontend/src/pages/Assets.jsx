@@ -24,8 +24,8 @@ const Assets = () => {
   const fetchData = async () => {
     try {
       const [assetsRes, catsRes, usersRes] = await Promise.all([
-        api.get('assets/assets/'),
-        api.get('assets/categories/'),
+        api.get('inventory/assets/'),
+        api.get('inventory/categories/'),
         api.get('leads/settings/users/')
       ]);
       setAssets(assetsRes.data);

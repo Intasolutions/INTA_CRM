@@ -105,7 +105,7 @@ const ProtectedLayout = ({ children }) => {
           {user?.permissions?.reports?.view !== false && <SidebarLink to="/reports" icon={BarChart3} label="Analytics" />}
           {user?.permissions?.campaigns?.view !== false && <SidebarLink to="/campaigns" icon={Megaphone} label="Campaigns" />}
           <SidebarLink to="/tasks" icon={Trello} label="Team Tasks" />
-          <SidebarLink to="/assets" icon={Database} label="Asset Management" />
+          <SidebarLink to="/inventory" icon={Database} label="Asset Management" />
           {user?.role === 'admin' && <SidebarLink to="/settings" icon={SettingsIcon} label="Settings" />}
         </nav>
 
@@ -161,7 +161,7 @@ function App() {
       <Route path="/campaigns" element={<ProtectedLayout><Campaigns /></ProtectedLayout>} />
       <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
       <Route path="/tasks" element={<ProtectedLayout><InternalTasks /></ProtectedLayout>} />
-      <Route path="/assets" element={<ProtectedLayout><Assets /></ProtectedLayout>} />
+      <Route path="/inventory" element={<ProtectedLayout><Assets /></ProtectedLayout>} />
     </Routes>
   );
 }
