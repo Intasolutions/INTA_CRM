@@ -8,7 +8,7 @@ class AssetCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AssetAssignmentHistorySerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='assigned_to.username', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
     
     class Meta:
         model = AssetAssignmentHistory
@@ -22,7 +22,7 @@ class AssetMaintenanceSerializer(serializers.ModelSerializer):
 class AssetSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     assigned_to_detail = serializers.SerializerMethodField()
-    maintenance_records = AssetMaintenanceSerializer(many=True, read_only=True, source='maintenance_history')
+    maintenance_records = AssetMaintenanceSerializer(many=True, read_only=True, source='maintenances')
     assignment_history = AssetAssignmentHistorySerializer(many=True, read_only=True)
 
     class Meta:
