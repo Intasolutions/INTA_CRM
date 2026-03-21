@@ -152,9 +152,10 @@ const ImportLeads = () => {
 
       setImportStatus({
         total: mappedLeads.length,
-        completed: (res.data.created || 0) + (res.data.updated || 0),
+        completed: res.data.created || 0,
+        updated: res.data.updated || 0,
         skipped: res.data.skipped || 0,
-        error_count: res.data.error_count || res.data.errors?.length || 0,
+        error_count: res.data.error_count || 0,
         errors: res.data.errors || []
       });
     } catch (err) {
@@ -390,7 +391,11 @@ const ImportLeads = () => {
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '40px' }}>
                     <div>
                       <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--success)' }}>{importStatus.completed}</div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Successful</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Created</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: 'var(--brand-blue)' }}>{importStatus.updated || 0}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Updated</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '24px', fontWeight: '800' }}>{importStatus.skipped}</div>
