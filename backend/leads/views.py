@@ -119,6 +119,14 @@ class LeadViewSet(viewsets.ModelViewSet):
             leads_data = request.data.get('leads', [])
             strategy = request.data.get('strategy', 'skip')
             
+            # Reset SQLite auto-increment counter to avoid UNIQUE constraint collisions on ID
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT MAX(id) FROM leads_lead")
+                max_id = cursor.fetchone()[0] or 0
+                cursor.execute(f"DELETE FROM sqlite_sequence WHERE name='leads_lead'")
+                cursor.execute(f"INSERT INTO sqlite_sequence (name, seq) VALUES ('leads_lead', {max_id})")
+            
             # Simple log without emojis to be safe on Windows consoles
             print(f"BULK IMPORT: Received {len(leads_data)} leads. Strategy: {strategy}")
             
