@@ -130,20 +130,31 @@ const ImportLeads = () => {
       return lead;
     });
 
+    console.log('📦 Prepared Mapped Leads:', mappedLeads.length, mappedLeads);
+
+    if (mappedLeads.length === 0) {
+      toast.error('No leads found to import. Please check your mapping.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await api.post('leads/bulk_import/', {
         leads: mappedLeads,
         strategy: duplicateStrategy
       });
-        setImportStatus({
-          total: mappedLeads.length,
-          completed: res.data.created + res.data.updated,
-          skipped: res.data.skipped,
-          error_count: res.data.error_count || res.data.errors?.length || 0,
-          errors: res.data.errors
-        });
+
+      console.log('✅ Import Result:', res.data);
+
+      setImportStatus({
+        total: mappedLeads.length,
+        completed: (res.data.created || 0) + (res.data.updated || 0),
+        skipped: res.data.skipped || 0,
+        error_count: res.data.error_count || res.data.errors?.length || 0,
+        errors: res.data.errors || []
+      });
     } catch (err) {
-      console.error(err);
+      console.error('❌ Import Failed:', err);
       setImportStatus(prev => ({ ...prev, errors: [{ message: 'Import failed: Server error' }] }));
     } finally {
       setLoading(false);
