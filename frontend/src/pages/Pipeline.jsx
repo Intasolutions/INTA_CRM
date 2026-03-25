@@ -71,11 +71,14 @@ const Pipeline = () => {
 
   return (
     <div className="page-container" style={{ 
-      height: 'calc(100vh - 80px)', // Rigid height to force internal scrolls
+      height: '100vh', 
       display: 'flex', 
       flexDirection: 'column',
-      overflow: 'hidden', // Prevent main page from scrolling
-      padding: isMobile ? '16px' : '32px'
+      overflow: 'hidden', 
+      padding: isMobile ? '16px' : '32px 32px 0 32px', // Flush to bottom
+      margin: '-40px -40px 0 -40px', // Negate default page-container padding
+      width: 'calc(100% + 80px)', // Adjust for negative margins
+      background: 'var(--bg-primary)'
     }}>
       <header className="page-header-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', gap: '20px', flexWrap: 'wrap' }}>
         <div>
@@ -198,7 +201,7 @@ const Pipeline = () => {
         })}
       </div>
 
-      <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', borderRadius: '12px', marginTop: '16px' }}>
+      <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
         <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
           {pagination.count} total leads
         </p>
