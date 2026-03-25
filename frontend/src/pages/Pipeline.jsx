@@ -71,14 +71,11 @@ const Pipeline = () => {
 
   return (
     <div className="page-container" style={{ 
-      height: 'calc(100vh - 40px)', // Rigid height to force internal scrolls
+      height: 'calc(100vh - 40px)', // Fits perfectly within main area
       display: 'flex', 
       flexDirection: 'column',
       overflow: 'hidden', 
-      padding: isMobile ? '16px' : '0 32px 0 32px', // Flush to bottom
-      margin: '0 -40px 0 -40px', // Negate horizontal padding only
-      width: 'calc(100% + 80px)', // Adjust for horizontal margins
-      background: 'var(--bg-primary)'
+      paddingBottom: 0 // Allow board to touch the bottom
     }}>
       <header className="page-header-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', padding: '24px 0', gap: '20px', flexWrap: 'wrap' }}>
         <div>
