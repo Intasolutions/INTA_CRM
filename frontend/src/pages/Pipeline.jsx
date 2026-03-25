@@ -96,12 +96,14 @@ const Pipeline = () => {
         flex: 1, 
         display: 'flex', 
         flexDirection: isMobile ? 'column' : 'row',
-        gap: '16px', 
+        gap: '20px', 
         overflowX: isMobile ? 'hidden' : 'auto', 
         overflowY: isMobile ? 'auto' : 'hidden',
         paddingBottom: '20px',
-        alignItems: 'flex-start',
-        scrollSnapType: isMobile ? 'none' : 'x mandatory'
+        paddingRight: '20px',
+        alignItems: 'stretch', // Changed from flex-start to stretch for consistent column heights
+        scrollSnapType: isMobile ? 'none' : 'x mandatory',
+        WebkitOverflowScrolling: 'touch'
       }}>
         {stages.map(stage => {
           const stageLeads = leads.filter(l => l.stage == stage.id);
@@ -111,17 +113,18 @@ const Pipeline = () => {
               onDragOver={onDragOver}
               onDrop={(e) => onDrop(e, stage.id)}
               style={{ 
-                minWidth: isMobile ? '100%' : '320px',
-                maxWidth: isMobile ? '100%' : '320px',
-                flexBasis: isMobile ? 'auto' : '320px',
-                background: 'rgba(248, 250, 252, 0.5)', 
+                minWidth: isMobile ? '100%' : '340px',
+                maxWidth: isMobile ? '100%' : '340px',
+                flexBasis: isMobile ? 'auto' : '340px',
+                background: 'rgba(248, 250, 252, 0.4)', 
                 borderRadius: '16px', 
                 display: 'flex', 
                 flexDirection: 'column',
-                maxHeight: isMobile ? 'auto' : '100%',
+                height: isMobile ? 'auto' : 'calc(100vh - 280px)', // Fixed height for vertical scroll
                 border: '1px solid var(--border-color)',
                 flexShrink: 0,
-                marginBottom: isMobile ? '16px' : '0'
+                marginBottom: isMobile ? '20px' : '0',
+                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
               }}
             >
               <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `3px solid ${stage.color}` }}>
@@ -134,7 +137,15 @@ const Pipeline = () => {
                 <MoreHorizontal size={18} style={{ color: 'var(--text-secondary)', cursor: 'pointer' }} />
               </div>
 
-              <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ 
+                padding: '12px', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '12px',
+                overflowY: 'auto', // Enable vertical scrolling inside column
+                flex: 1,
+                scrollbarWidth: 'thin'
+              }}>
                 <AnimatePresence>
                   {stageLeads.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '10px', color: 'var(--text-secondary)', fontSize: '12px', fontStyle: 'italic' }}>

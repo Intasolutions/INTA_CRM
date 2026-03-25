@@ -6,6 +6,7 @@ import {
   MoreVertical, Edit2, Trash2, X, Check, Search,
   TrendingUp, Target, DollarSign
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,15 +50,26 @@ const Campaigns = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Clean data before sending
+      const submissionData = {
+        ...formData,
+        budget: parseFloat(formData.budget) || 0,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null
+      };
+
       if (editingCampaign) {
-        await api.put(`campaigns/${editingCampaign.id}/`, formData);
+        await api.put(`campaigns/${editingCampaign.id}/`, submissionData);
       } else {
-        await api.post('campaigns/', formData);
+        await api.post('campaigns/', submissionData);
       }
       fetchData();
       setIsModalOpen(false);
+      toast.success(editingCampaign ? 'Campaign updated' : 'Campaign created');
     } catch (err) {
       console.error(err);
+      const msg = err.response?.data ? JSON.stringify(err.response.data) : 'Failed to save campaign';
+      toast.error(msg);
     }
   };
 
