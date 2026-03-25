@@ -70,7 +70,13 @@ const Pipeline = () => {
   if (loading) return <div className="page-container">Loading Pipeline...</div>;
 
   return (
-    <div className="page-container" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="page-container" style={{ 
+      height: 'calc(100vh - 80px)', // Rigid height to force internal scrolls
+      display: 'flex', 
+      flexDirection: 'column',
+      overflow: 'hidden', // Prevent main page from scrolling
+      padding: isMobile ? '16px' : '32px'
+    }}>
       <header className="page-header-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', gap: '20px', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ fontSize: isMobile ? '24px' : '28px', marginBottom: '4px' }}>CRM Pipeline</h1>
@@ -96,14 +102,14 @@ const Pipeline = () => {
         flex: 1, 
         display: 'flex', 
         flexDirection: isMobile ? 'column' : 'row',
-        gap: '20px', 
+        gap: '24px', 
         overflowX: isMobile ? 'hidden' : 'auto', 
         overflowY: isMobile ? 'auto' : 'hidden',
-        paddingBottom: '20px',
-        paddingRight: '20px',
-        alignItems: 'stretch', // Changed from flex-start to stretch for consistent column heights
+        paddingBottom: '16px',
+        alignItems: 'stretch',
         scrollSnapType: isMobile ? 'none' : 'x mandatory',
-        WebkitOverflowScrolling: 'touch'
+        WebkitOverflowScrolling: 'touch',
+        minHeight: 0 // Crucial for nested flex scrolling
       }}>
         {stages.map(stage => {
           const stageLeads = leads.filter(l => l.stage == stage.id);
@@ -113,18 +119,19 @@ const Pipeline = () => {
               onDragOver={onDragOver}
               onDrop={(e) => onDrop(e, stage.id)}
               style={{ 
-                minWidth: isMobile ? '100%' : '340px',
-                maxWidth: isMobile ? '100%' : '340px',
-                flexBasis: isMobile ? 'auto' : '340px',
-                background: 'rgba(248, 250, 252, 0.4)', 
+                minWidth: isMobile ? '100%' : '350px',
+                maxWidth: isMobile ? '100%' : '350px',
+                flexBasis: isMobile ? 'auto' : '350px',
+                background: '#f1f5f9', 
                 borderRadius: '16px', 
                 display: 'flex', 
                 flexDirection: 'column',
-                height: isMobile ? 'auto' : 'calc(100vh - 280px)', // Fixed height for vertical scroll
+                height: isMobile ? 'auto' : '100%', // Take full height of scroll container
                 border: '1px solid var(--border-color)',
                 flexShrink: 0,
-                marginBottom: isMobile ? '20px' : '0',
-                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                marginBottom: isMobile ? '24px' : '0',
+                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                overflow: 'hidden' // Keep the column itself clean
               }}
             >
               <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `3px solid ${stage.color}` }}>
@@ -138,13 +145,15 @@ const Pipeline = () => {
               </div>
 
               <div style={{ 
-                padding: '12px', 
+                padding: '16px', 
                 display: 'flex', 
                 flexDirection: 'column', 
                 gap: '12px',
-                overflowY: 'auto', // Enable vertical scrolling inside column
+                overflowY: 'auto', // THIS IS THE KEY VERTICAL SCROLL
                 flex: 1,
-                scrollbarWidth: 'thin'
+                minHeight: 0, // Force the scroll
+                scrollbarWidth: 'thin',
+                background: '#f8fafc'
               }}>
                 <AnimatePresence>
                   {stageLeads.length === 0 ? (
