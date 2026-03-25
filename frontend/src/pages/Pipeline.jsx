@@ -71,16 +71,16 @@ const Pipeline = () => {
 
   return (
     <div className="page-container" style={{ 
-      height: '100vh', 
+      height: 'calc(100vh - 40px)', // Rigid height to force internal scrolls
       display: 'flex', 
       flexDirection: 'column',
       overflow: 'hidden', 
-      padding: isMobile ? '16px' : '32px 32px 0 32px', // Flush to bottom
-      margin: '-40px -40px 0 -40px', // Negate default page-container padding
-      width: 'calc(100% + 80px)', // Adjust for negative margins
+      padding: isMobile ? '16px' : '0 32px 0 32px', // Flush to bottom
+      margin: '0 -40px 0 -40px', // Negate horizontal padding only
+      width: 'calc(100% + 80px)', // Adjust for horizontal margins
       background: 'var(--bg-primary)'
     }}>
-      <header className="page-header-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', gap: '20px', flexWrap: 'wrap' }}>
+      <header className="page-header-responsive" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', padding: '24px 0', gap: '20px', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ fontSize: isMobile ? '24px' : '28px', marginBottom: '4px' }}>CRM Pipeline</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{isMobile ? 'Vertical List View' : 'Kanban Board View (Drag & Drop)'}</p>
