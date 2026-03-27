@@ -3,25 +3,25 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Users, Target, TrendingUp, Clock, Plus, BarChart3, CheckCircle2, Sparkles, Zap, ArrowRight, PieChart as PieChartIcon, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area 
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area
 } from 'recharts';
 import api from '../api/client';
 
 const StatCard = ({ icon: Icon, title, value, color }) => (
-  <motion.div 
+  <motion.div
     whileHover={{ y: -5 }}
-    className="glass-card" 
+    className="glass-card"
     style={{ display: 'flex', alignItems: 'center', gap: '20px' }}
   >
-    <div style={{ 
-      width: '56px', 
-      height: '56px', 
-      borderRadius: '12px', 
-      background: `rgba(${color}, 0.1)`, 
-      display: 'flex', 
-      alignItems: 'center', 
+    <div style={{
+      width: '56px',
+      height: '56px',
+      borderRadius: '12px',
+      background: `rgba(${color}, 0.1)`,
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'center',
       color: `rgb(${color})`
     }}>
@@ -63,7 +63,7 @@ const Dashboard = () => {
           api.get('leads/pipeline_stats/'),
           api.get('internal-tasks/daily_briefing/')
         ]);
-        
+
         const [leadsRes, followupsRes, stagesRes, usersRes, pipelineRes, briefingRes] = results;
 
         if (pipelineRes.status === 'fulfilled') setPipelineStats(pipelineRes.value.data);
@@ -80,7 +80,7 @@ const Dashboard = () => {
           const active = leadsData.filter(l => !l.is_final).length;
           const won = leadsData.filter(l => l.stage_name === 'Closed Won').length;
           const pipelineValue = leadsData.reduce((sum, l) => sum + parseFloat(l.deal_value || 0), 0);
-          
+
           setLeads(leadsData);
           setStats(prev => ({
             ...prev,
@@ -101,7 +101,7 @@ const Dashboard = () => {
         }
 
         if (stagesRes.status === 'fulfilled') {
-          setStages(stagesRes.value.data.sort((a,b) => a.order - b.order));
+          setStages(stagesRes.value.data.sort((a, b) => a.order - b.order));
         }
 
         if (usersRes.status === 'fulfilled') {
@@ -117,7 +117,7 @@ const Dashboard = () => {
   // Process data for charts
   const trendData = useMemo(() => {
     if (!leads.length) return [];
-    
+
     // Group leads by month
     const groups = leads.reduce((acc, lead) => {
       const date = new Date(lead.created_at);
@@ -175,8 +175,8 @@ const Dashboard = () => {
           <p style={{ color: 'var(--text-secondary)' }}>Here's what's happening with your sales pipeline today.</p>
         </div>
         {user?.permissions?.leads?.create && (
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             onClick={() => navigate('/leads')}
           >
@@ -191,9 +191,9 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="glass-card mobile-stack"
-            style={{ 
-              marginBottom: isMobile ? '24px' : '40px', 
-              padding: isMobile ? '20px' : '24px 32px', 
+            style={{
+              marginBottom: isMobile ? '24px' : '40px',
+              padding: isMobile ? '20px' : '24px 32px',
               background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%)',
               border: '1px solid rgba(139, 92, 246, 0.15)',
               display: 'flex',
@@ -204,14 +204,14 @@ const Dashboard = () => {
             }}
           >
             <div style={{ position: 'absolute', top: '-50%', right: '-10%', width: '300px', height: '300px', background: 'rgba(139, 92, 246, 0.1)', filter: 'blur(60px)', borderRadius: '50%', zIndex: 0 }}></div>
-            
-            <div style={{ 
-              width: '52px', 
-              height: '52px', 
-              borderRadius: '16px', 
-              background: 'var(--brand-blue)', 
-              display: 'flex', 
-              alignItems: 'center', 
+
+            <div style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: '16px',
+              background: 'var(--brand-blue)',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               color: 'white',
               boxShadow: '0 8px 16px rgba(30, 58, 138, 0.25)',
@@ -220,7 +220,7 @@ const Dashboard = () => {
             }}>
               <Sparkles size={24} />
             </div>
-            
+
             <div style={{ flex: 1, zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                 <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--brand-blue)', textTransform: 'uppercase', letterSpacing: '1px' }}>AI Strategic Briefing</span>
@@ -231,19 +231,19 @@ const Dashboard = () => {
                 {briefing.briefing.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} style={{ color: 'var(--brand-blue)', fontWeight: '700' }}>{part}</strong> : part)}
               </p>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => navigate('/tasks')}
               className="btn-secondary mobile-full"
-              style={{ 
+              style={{
                 zIndex: 1,
-                display: 'flex', 
-                alignItems: 'center', 
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
-                gap: '10px', 
-                padding: '12px 20px', 
-                background: 'white', 
-                border: '1px solid var(--border-color)', 
+                gap: '10px',
+                padding: '12px 20px',
+                background: 'white',
+                border: '1px solid var(--border-color)',
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: '700',
@@ -251,13 +251,13 @@ const Dashboard = () => {
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
               }}
-              onMouseEnter={(e) => { 
-                e.currentTarget.style.background = 'var(--bg-tertiary)'; 
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--bg-tertiary)';
                 e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
               }}
-              onMouseLeave={(e) => { 
-                e.currentTarget.style.background = 'white'; 
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
               }}
@@ -290,14 +290,14 @@ const Dashboard = () => {
               <AreaChart data={trendData}>
                 <defs>
                   <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--brand-blue)" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="var(--brand-blue)" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="var(--brand-blue)" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="var(--brand-blue)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
                   itemStyle={{ fontWeight: 'bold', color: 'var(--brand-blue)' }}
                 />
@@ -328,7 +328,7 @@ const Dashboard = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                 />
               </PieChart>
@@ -357,7 +357,7 @@ const Dashboard = () => {
               <p style={{ fontSize: '24px', fontWeight: '800', color: '#10b981' }}>₹{Math.round(pipelineStats?.total_forecasted_revenue || 0).toLocaleString('en-IN')}</p>
             </div>
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {pipelineStats?.stage_breakdown?.map((stage) => (
               <div key={stage.stage}>
@@ -366,10 +366,10 @@ const Dashboard = () => {
                   <span style={{ fontWeight: '700' }}>₹{stage.value.toLocaleString('en-IN')} <span style={{ fontSize: '11px', color: '#10b981' }}>({stage.probability}% prob.)</span></span>
                 </div>
                 <div style={{ height: '12px', background: 'var(--bg-tertiary)', borderRadius: '6px', overflow: 'hidden' }}>
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: calculateWidth(stage.value, stats.pipelineValue) }}
-                    style={{ height: '100%', background: stage.color || 'var(--brand-blue)', borderRadius: '6px' }} 
+                    style={{ height: '100%', background: stage.color || 'var(--brand-blue)', borderRadius: '6px' }}
                   />
                 </div>
               </div>
@@ -384,36 +384,36 @@ const Dashboard = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {users.length === 0 ? (
-               <p style={{ color: 'var(--text-secondary)', fontSize: '13px', textAlign: 'center' }}>No team data found.</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', textAlign: 'center' }}>No team data found.</p>
             ) : (
-            users
-              .filter(u => {
-                if (user?.role === 'admin' || user?.role === 'manager') return true;
-                return u.id === user?.id;
-              })
-              .slice(0, 5).map(u => {
-              const userLeads = leads.filter(l => l.assigned_to === u.id);
-              const wonLeads = userLeads.filter(l => l.is_final && l.stage_name?.toLowerCase()?.includes('won')).length;
-              const rate = userLeads.length > 0 ? Math.round((wonLeads / userLeads.length) * 100) : 0;
-              
-              return (
-                <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: 'var(--brand-blue)' }}>
-                      {u.username?.[0]?.toUpperCase() || 'U'}
+              users
+                .filter(u => {
+                  if (user?.role === 'admin' || user?.role === 'manager') return true;
+                  return u.id === user?.id;
+                })
+                .slice(0, 5).map(u => {
+                  const userLeads = leads.filter(l => l.assigned_to === u.id);
+                  const wonLeads = userLeads.filter(l => l.is_final && l.stage_name?.toLowerCase()?.includes('won')).length;
+                  const rate = userLeads.length > 0 ? Math.round((wonLeads / userLeads.length) * 100) : 0;
+
+                  return (
+                    <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', color: 'var(--brand-blue)' }}>
+                          {u.username?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: '600' }}>{u.username}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{userLeads.length} Leads</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--success)' }}>{rate}%</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Win Rate</div>
+                      </div>
                     </div>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: '600' }}>{u.username}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{userLeads.length} Leads</div>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--success)' }}>{rate}%</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Win Rate</div>
-                  </div>
-                </div>
-              );
-            })
+                  );
+                })
             )}
           </div>
         </div>
@@ -425,7 +425,7 @@ const Dashboard = () => {
             <h2 style={{ fontSize: '20px' }}>Lead Conversion Funnel</h2>
             <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Live Analytics</div>
           </div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '20px 0' }}>
             {leads.length === 0 ? (
               <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '60px' }}>
@@ -433,30 +433,30 @@ const Dashboard = () => {
                 No lead data available for funnel.
               </div>
             ) : (
-                stages.slice(0, 6).map((stage, i) => {
-                  const count = leads.filter(l => l.stage === stage.id).length;
-                  const percentage = Math.round((count / leads.length) * 100) || 0;
-                  const width = `${Math.max(15, percentage)}%`;
-                  
-                  return (
-                    <div key={stage.id} style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                      <div style={{ width: '120px', fontSize: '13px', textAlign: 'right', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {stage.name}
-                      </div>
-                      <div style={{ flex: 1, position: 'relative' }}>
-                        <motion.div 
-                          initial={{ width: 0 }} 
-                          animate={{ width: width }} 
-                          style={{ height: '32px', background: stage.color || '#3b82f6', borderRadius: '4px', opacity: 0.8, display: 'flex', alignItems: 'center', padding: '0 12px', color: 'white', fontSize: '12px', fontWeight: 'bold' }}>
-                          {count}
-                        </motion.div>
-                      </div>
-                      <div style={{ width: '60px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                        {percentage}%
-                      </div>
+              stages.slice(0, 6).map((stage, i) => {
+                const count = leads.filter(l => l.stage === stage.id).length;
+                const percentage = Math.round((count / leads.length) * 100) || 0;
+                const width = `${Math.max(15, percentage)}%`;
+
+                return (
+                  <div key={stage.id} style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ width: '120px', fontSize: '13px', textAlign: 'right', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {stage.name}
                     </div>
-                  );
-                })
+                    <div style={{ flex: 1, position: 'relative' }}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: width }}
+                        style={{ height: '32px', background: stage.color || '#3b82f6', borderRadius: '4px', opacity: 0.8, display: 'flex', alignItems: 'center', padding: '0 12px', color: 'white', fontSize: '12px', fontWeight: 'bold' }}>
+                        {count}
+                      </motion.div>
+                    </div>
+                    <div style={{ width: '60px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {percentage}%
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -469,16 +469,16 @@ const Dashboard = () => {
             ) : (
               reminders.filter(r => r.status === 'pending').slice(0, 5).map(rem => (
                 <div key={rem.id} style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', position: 'relative' }}>
-                  <button 
+                  <button
                     onClick={() => handleToggleReminderStatus(rem.id, rem.status)}
-                    style={{ 
-                      width: '36px', 
-                      height: '36px', 
-                      borderRadius: '50%', 
-                      background: 'var(--bg-tertiary)', 
-                      color: 'var(--text-secondary)', 
-                      display: 'flex', 
-                      alignItems: 'center', 
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'var(--bg-tertiary)',
+                      color: 'var(--text-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
                       justifyContent: 'center',
                       border: 'none',
                       cursor: 'pointer',
@@ -489,7 +489,7 @@ const Dashboard = () => {
                   >
                     <CheckCircle2 size={16} />
                   </button>
-                  <div 
+                  <div
                     onClick={() => navigate(`/leads/${rem.lead}`)}
                     style={{ cursor: 'pointer', flex: 1 }}
                   >
