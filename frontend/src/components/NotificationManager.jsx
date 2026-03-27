@@ -1,43 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { Bell } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import api from '../api/client';
 import { useNavigate } from 'react-router-dom';
 
 const NotificationManager = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const notifiedSet = useRef(new Set());
 
   useEffect(() => {
     if (!user) return;
 
-    // Track notified reminders to avoid spam
-    const notifiedSet = new Set();
-    
     const checkReminders = async () => {
       try {
         const res = await api.get('reminders/?no_pagination=true');
         const now = new Date();
-        
-        // Handle both simple array and paginated results
         const remindersArr = Array.isArray(res.data) ? res.data : (res.data.results || []);
         
         remindersArr.forEach(rem => {
           if (rem.status === 'pending') {
             const scheduledTime = new Date(rem.scheduled_at);
-            
-            // If reminder is due or up to 60 mins past due, and we haven't notified yet.
             const timeDiff = now - scheduledTime;
             
             // Pop if due within last 60 minutes AND not yet popped this session
-            // Also pop if it's due in the next 10 seconds to be proactive
-            if (timeDiff >= -10000 && timeDiff <= 60 * 60 * 1000 && !notifiedSet.has(rem.id)) {
-              notifiedSet.add(rem.id);
+            if (timeDiff >= -10000 && timeDiff <= 60 * 60 * 1000 && !notifiedSet.current.has(rem.id)) {
+              notifiedSet.current.add(rem.id);
               
               toast.custom((t) => (
                 <div 
-                  className="glass-card" 
+                  className="glass-card animate-fade-in" 
                   style={{ 
                     padding: '16px', 
                     display: 'flex', 
@@ -45,23 +38,30 @@ const NotificationManager = () => {
                     alignItems: 'flex-start',
                     cursor: 'pointer',
                     boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                    borderLeft: '4px solid var(--brand-blue)'
+                    borderLeft: '4px solid var(--brand-blue)',
+                    maxWidth: '400px',
+                    position: 'relative'
                   }}
                   onClick={() => {
                     toast.dismiss(t.id);
                     navigate(`/leads/${rem.lead}`);
                   }}
                 >
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-blue)' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(30, 58, 138, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-blue)', flexShrink: 0 }}>
                     <Bell size={16} />
                   </div>
-                  <div>
-                    <h4 style={{ fontWeight: '700', fontSize: '14px', marginBottom: '4px' }}>Reminder Due!</h4>
-                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{rem.note || 'You have a scheduled task.'}</p>
-                    <p style={{ fontSize: '11px', color: 'var(--brand-blue)', marginTop: '8px', fontWeight: 'bold' }}>Click to view Lead</p>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <h4 style={{ fontWeight: '700', fontSize: '14px', margin: 0 }}>Reminder Due!</h4>
+                        <button onClick={(e) => { e.stopPropagation(); toast.dismiss(t.id); }} style={{ background: 'none', padding: '4px', opacity: 0.5 }}>
+                            <X size={14} />
+                        </button>
+                    </div>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>{rem.note || 'You have a scheduled task.'}</p>
+                    <p style={{ fontSize: '11px', color: 'var(--brand-blue)', marginTop: '8px', fontWeight: 'bold' }}>Click to view details</p>
                   </div>
                 </div>
-              ), { duration: 15000 });
+              ), { duration: 15000, position: 'top-right' });
             }
           }
         });
@@ -70,8 +70,8 @@ const NotificationManager = () => {
       }
     };
 
-    checkReminders(); // Initial check
-    const interval = setInterval(checkReminders, 1000); // Check every 1 second
+    checkReminders();
+    const interval = setInterval(checkReminders, 10000); // Check every 10 seconds (reduced frequency)
 
     return () => clearInterval(interval);
   }, [user, navigate]);
