@@ -79,6 +79,10 @@ button {
 }
 
 /* Professional Card Styles */
+.sidebar {
+  display: flex !important;
+}
+
 .glass-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -188,19 +192,21 @@ button {
   }
 
   .sidebar {
+    display: none !important; /* Hide on mobile by default */
     position: fixed;
     top: 61px;
     left: -100%;
     width: 100% !important;
     height: calc(100vh - 61px) !important;
     z-index: 40;
-    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 24px !important;
     border-right: none !important;
     overflow-y: auto;
   }
 
   .sidebar.mobile-open {
+    display: flex !important; /* Show when menu is toggled */
     left: 0;
   }
 

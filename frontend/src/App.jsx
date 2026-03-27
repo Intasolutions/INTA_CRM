@@ -79,11 +79,28 @@ const ProtectedLayout = ({ children }) => {
         </button>
       </div>
 
+      {/* Mobile Sidebar Backdrop Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          onClick={() => setIsMobileMenuOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.3)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 35,
+            display: 'block'
+          }}
+        />
+      )}
+
       <aside style={{ 
         width: '280px', 
         borderRight: '1px solid var(--border-color)', 
         padding: '32px 20px',
-        display: isMobileMenuOpen ? 'flex' : 'flex', // Handled by CSS media query
         flexDirection: 'column',
         background: 'var(--bg-secondary)',
         transition: 'all 0.3s ease',
@@ -136,7 +153,7 @@ const ProtectedLayout = ({ children }) => {
           </button>
         </div>
       </aside>
-      <main style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-primary)' }}>
+      <main style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-primary)', position: 'relative' }}>
         {children}
       </main>
     </div>
