@@ -44,6 +44,14 @@ const Dashboard = () => {
   const [pipelineStats, setPipelineStats] = useState(null);
   const [briefing, setBriefing] = useState(null);
   const [briefingLoading, setBriefingLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [stats, setStats] = useState({
     totalLeads: 0,
     activePiepline: 0,
