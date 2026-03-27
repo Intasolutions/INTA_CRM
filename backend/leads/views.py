@@ -589,6 +589,11 @@ class QuotationViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 
+class LeadAuditLogViewSet(viewsets.ModelViewSet):
+    queryset = LeadAuditLog.objects.all()
+    serializer_class = LeadAuditLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 class QuotationItemViewSet(viewsets.ModelViewSet):
     queryset = QuotationItem.objects.all()
     serializer_class = QuotationItemSerializer

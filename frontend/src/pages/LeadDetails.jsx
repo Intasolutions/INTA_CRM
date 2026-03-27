@@ -210,6 +210,32 @@ const LeadDetails = () => {
     }
   };
 
+  const handleDeleteActivity = async (actId) => {
+    if (window.confirm('Are you sure you want to delete this activity from history?')) {
+      try {
+        await api.delete(`activities/${actId}/`);
+        fetchData();
+        toast.success('Activity deleted from history');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to delete activity');
+      }
+    }
+  };
+
+  const handleDeleteAudit = async (auditId) => {
+    if (window.confirm('Are you sure you want to delete this audit entry?')) {
+      try {
+        await api.delete(`audit-logs/${auditId}/`);
+        fetchData();
+        toast.success('Audit entry deleted');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to delete audit entry');
+      }
+    }
+  };
+
   const handleScheduleReminder = async (e) => {
     e.preventDefault();
     if (!reminderNote || !reminderDate) return;
@@ -817,9 +843,27 @@ const LeadDetails = () => {
                             }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                                 <span style={{ fontWeight: '800', fontSize: '11px', color: config.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{config.label}</span>
-                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '4px' }}>
-                                  {new Date(act.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '4px' }}>
+                                    {new Date(act.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                                  </span>
+                                  <button 
+                                    onClick={() => handleDeleteActivity(act.id)}
+                                    style={{ 
+                                      background: 'none', 
+                                      border: 'none', 
+                                      color: 'var(--danger)', 
+                                      cursor: 'pointer', 
+                                      padding: '4px',
+                                      opacity: 0.5,
+                                      transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.opacity = 1}
+                                    onMouseOut={(e) => e.currentTarget.style.opacity = 0.5}
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </div>
                               </div>
                               <p style={{ fontSize: '14px', margin: 0, lineHeight: '1.6', color: 'var(--text-primary)' }}>{act.note}</p>
                             </div>
@@ -843,9 +887,27 @@ const LeadDetails = () => {
                           <div className="glass-card" style={{ padding: '24px', marginLeft: '12px', borderLeft: '4px solid #ef4444', background: 'white' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                               <span style={{ fontWeight: '800', fontSize: '11px', color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{log.action}</span>
-                              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '4px' }}>
-                                {new Date(log.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
-                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '4px' }}>
+                                  {new Date(log.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                                </span>
+                                <button 
+                                  onClick={() => handleDeleteAudit(log.id)}
+                                  style={{ 
+                                    background: 'none', 
+                                    border: 'none', 
+                                    color: 'var(--danger)', 
+                                    cursor: 'pointer', 
+                                    padding: '4px',
+                                    opacity: 0.5,
+                                    transition: 'opacity 0.2s'
+                                  }}
+                                  onMouseOver={(e) => e.currentTarget.style.opacity = 1}
+                                  onMouseOut={(e) => e.currentTarget.style.opacity = 0.5}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                               <div style={{ padding: '8px 12px', background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '8px', fontSize: '13px', color: '#991b1b' }}>
