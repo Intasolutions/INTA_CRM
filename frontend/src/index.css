@@ -20,6 +20,12 @@
   --transition: all 0.2s ease;
 }
 
+.page-container {
+  padding: 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
 @media (max-width: 1024px) {
   .page-container {
     padding: 24px;
@@ -199,7 +205,7 @@ button {
   }
 
   main {
-    padding: 24px !important;
+    padding: 0 !important;
   }
 
   .dashboard-grid, .stat-grid {
