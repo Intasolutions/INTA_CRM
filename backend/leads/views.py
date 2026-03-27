@@ -470,7 +470,7 @@ class InternalTaskViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def daily_briefing(self, request):
-        now = timezone.now()
+        now = timezone.localtime()
         # Basic timezone heuristic for greeting (if profile has no TZ, use server time)
         hour = now.hour
         if 5 <= hour < 12:
