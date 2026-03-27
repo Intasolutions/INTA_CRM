@@ -23,21 +23,22 @@ const Pipeline = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const fetchData = async (page = 1) => {
+  const fetchData = async () => {
     setLoading(true);
     try {
+      // For the Pipeline view, we fetch ALL leads (no_pagination) to show the full board
       const [stagesRes, leadsRes] = await Promise.all([
         api.get('stages/'),
-        api.get(`leads/?page=${page}`)
+        api.get('leads/?no_pagination=true')
       ]);
       
       const stagesData = Array.isArray(stagesRes.data) ? stagesRes.data : [];
-      const leadsData = leadsRes.data?.results || [];
-      const totalCount = leadsRes.data?.count || 0;
+      const leadsData = Array.isArray(leadsRes.data) ? leadsRes.data : leadsRes.data?.results || [];
+      const totalCount = Array.isArray(leadsRes.data) ? leadsRes.data.length : (leadsRes.data?.count || 0);
 
       setStages(stagesData.sort((a,b) => (a.order || 0) - (b.order || 0)));
-      setLeads(Array.isArray(leadsData) ? leadsData : []);
-      setPagination({ count: totalCount, current: page });
+      setLeads(leadsData);
+      setPagination({ count: totalCount, current: 1 });
     } catch (err) {
       console.error('Pipeline fetch error:', err);
       toast.error('Failed to load pipeline data');
@@ -46,24 +47,79 @@ const Pipeline = () => {
     }
   };
 
+  // Horizontal Scroll Handler for Dragging
+  const boardRef = React.useRef(null);
+  const scrollInterval = React.useRef(null);
+
+  const handleDragOverScroll = (e) => {
+    onDragOver(e);
+    
+    if (!boardRef.current) return;
+    
+    const { clientX } = e;
+    const { left, right, width } = boardRef.current.getBoundingClientRect();
+    const scrollThreshold = 100; // Pixels from edge to start scrolling
+    
+    clearInterval(scrollInterval.current);
+    
+    if (clientX < left + scrollThreshold) {
+      scrollInterval.current = setInterval(() => {
+        boardRef.current.scrollLeft -= 10;
+      }, 10);
+    } else if (clientX > right - scrollThreshold) {
+      scrollInterval.current = setInterval(() => {
+        boardRef.current.scrollLeft += 10;
+      }, 10);
+    }
+  };
+
+  const stopScroll = () => {
+    clearInterval(scrollInterval.current);
+  };
+
   const onDragOver = (e) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
   };
 
   const onDragStart = (e, leadId) => {
-    if (isMobile) return; // Disable drag and drop on mobile as it's a list view
-    e.dataTransfer.setData("leadId", leadId);
+    if (isMobile) return;
+    e.dataTransfer.setData("leadId", leadId.toString()); // Ensure it's a string
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const [draggedOverStage, setDraggedOverStage] = useState(null);
+
+  const onDragEnter = (e, stageId) => {
+    e.preventDefault();
+    setDraggedOverStage(stageId);
+  };
+
+  const onDragLeave = (e) => {
+    e.preventDefault();
+    // Only clear if we're actually leaving the column, not just moving between children
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    setDraggedOverStage(null);
   };
 
   const onDrop = async (e, stageId) => {
+    e.preventDefault();
+    stopScroll();
+    setDraggedOverStage(null);
     const leadId = e.dataTransfer.getData("leadId");
+    if (!leadId) return;
+
     try {
+      // Optimistic UI Update
       setLeads(prev => prev.map(l => l.id == leadId ? { ...l, stage: stageId } : l));
-      await api.patch(`leads/${leadId}/`, { stage: stageId });
-      fetchData(pagination.current);
+      
+      const res = await api.patch(`leads/${leadId}/`, { stage: stageId });
+      toast.success(`Moved to ${stages.find(s => s.id === stageId)?.name}`);
+      fetchData();
     } catch (err) {
-      console.error(err);
-      fetchData(pagination.current);
+      console.error('Move failed:', err);
+      toast.error('Failed to move lead');
+      fetchData();
     }
   };
 
@@ -98,45 +154,52 @@ const Pipeline = () => {
         </div>
       </header>
 
-      <div style={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: isMobile ? 'column' : 'row',
-        gap: '24px', 
-        overflowX: isMobile ? 'hidden' : 'auto', 
-        overflowY: isMobile ? 'auto' : 'hidden',
-        paddingBottom: '16px',
-        alignItems: 'stretch',
-        scrollSnapType: isMobile ? 'none' : 'x mandatory',
-        WebkitOverflowScrolling: 'touch',
-        minHeight: 0 // Crucial for nested flex scrolling
-      }}>
+      <div 
+        ref={boardRef}
+        onDragLeave={stopScroll}
+        onDrop={stopScroll}
+        style={{ 
+          flex: 1, 
+          display: 'flex', 
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: '24px', 
+          overflowX: isMobile ? 'hidden' : 'auto', 
+          overflowY: isMobile ? 'auto' : 'hidden',
+          paddingBottom: '16px',
+          alignItems: 'stretch',
+          scrollSnapType: isMobile ? 'none' : 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          minHeight: 0 
+        }}>
         {stages.map(stage => {
           const stageLeads = leads.filter(l => l.stage == stage.id);
           return (
             <div 
               key={stage.id} 
-              onDragOver={onDragOver}
+              onDragOver={handleDragOverScroll}
+              onDragEnter={(e) => onDragEnter(e, stage.id)}
+              onDragLeave={onDragLeave}
               onDrop={(e) => onDrop(e, stage.id)}
               style={{ 
                 minWidth: isMobile ? '100%' : '350px',
                 maxWidth: isMobile ? '100%' : '350px',
                 flexBasis: isMobile ? 'auto' : '350px',
-                background: '#f1f5f9', 
+                background: draggedOverStage === stage.id ? '#eef2ff' : '#f1f5f9', 
                 borderRadius: '16px', 
                 display: 'flex', 
                 flexDirection: 'column',
-                height: isMobile ? 'auto' : '100%', // Take full height of scroll container
-                border: '1px solid var(--border-color)',
+                height: isMobile ? 'auto' : '100%', 
+                border: draggedOverStage === stage.id ? '2px dashed var(--brand-blue)' : '1px solid var(--border-color)',
                 flexShrink: 0,
                 marginBottom: isMobile ? '24px' : '0',
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-                overflow: 'hidden' // Keep the column itself clean
+                boxShadow: draggedOverStage === stage.id ? '0 10px 15px -3px rgba(30, 58, 138, 0.1)' : '0 4px 6px -1px rgba(0,0,0,0.05)',
+                overflow: 'hidden',
+                transition: 'all 0.2s ease'
               }}
             >
-              <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `3px solid ${stage.color}` }}>
+              <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `3px solid ${stage.color}`, background: draggedOverStage === stage.id ? 'rgba(30, 58, 138, 0.05)' : 'transparent' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontWeight: '700', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stage.name}</span>
+                  <span style={{ fontWeight: '700', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: draggedOverStage === stage.id ? 'var(--brand-blue)' : 'inherit' }}>{stage.name}</span>
                   <span style={{ fontSize: '11px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', padding: '2px 6px', borderRadius: '10px' }}>
                     {stageLeads.length}
                   </span>
@@ -144,21 +207,24 @@ const Pipeline = () => {
                 <MoreHorizontal size={18} style={{ color: 'var(--text-secondary)', cursor: 'pointer' }} />
               </div>
 
-              <div style={{ 
-                padding: '16px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '12px',
-                overflowY: 'auto', // THIS IS THE KEY VERTICAL SCROLL
-                flex: 1,
-                minHeight: 0, // Force the scroll
-                scrollbarWidth: 'thin',
-                background: '#f8fafc'
-              }}>
+              <div 
+                onDragOver={onDragOver} // Ensure the list area itself is a drop target
+                onDrop={(e) => onDrop(e, stage.id)}
+                style={{ 
+                  padding: '16px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '12px',
+                  overflowY: 'auto', 
+                  flex: 1,
+                  minHeight: 0, 
+                  scrollbarWidth: 'thin',
+                  background: draggedOverStage === stage.id ? 'rgba(30, 58, 138, 0.02)' : '#f8fafc'
+                }}>
                 <AnimatePresence>
                   {stageLeads.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '10px', color: 'var(--text-secondary)', fontSize: '12px', fontStyle: 'italic' }}>
-                      No active leads
+                    <div style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--text-secondary)', fontSize: '12px', fontStyle: 'italic' }}>
+                      No active leads in this stage
                     </div>
                   ) : (
                     stageLeads.map(lead => (
@@ -200,24 +266,8 @@ const Pipeline = () => {
 
       <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
         <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-          {pagination.count} total leads
+          Showing all {pagination.count} leads in the pipeline view.
         </p>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button 
-            disabled={pagination.current === 1}
-            onClick={() => fetchData(pagination.current - 1)}
-            className="btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}
-          >
-            Prev
-          </button>
-          <button 
-            disabled={pagination.current * 10 >= pagination.count}
-            onClick={() => fetchData(pagination.current + 1)}
-            className="btn-primary" style={{ padding: '4px 12px', fontSize: '12px' }}
-          >
-            Next
-          </button>
-        </div>
       </div>
 
       <LeadModal 
