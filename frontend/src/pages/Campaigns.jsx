@@ -163,7 +163,7 @@ const Campaigns = () => {
         ))}
       </div>
 
-      <div className="integration-grid">
+      <div className="responsive-grid">
         {loading ? (
           <p>Loading campaigns...</p>
         ) : campaigns.length === 0 ? (
@@ -248,8 +248,8 @@ const Campaigns = () => {
         {isModalOpen && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px', backdropFilter: 'blur(4px)' }}>
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-              className="glass-card" style={{ width: '100%', maxWidth: '600px', padding: '32px' }}
+              initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }}
+              className="glass-card" style={{ width: '100%', maxWidth: '600px', padding: '32px', maxHeight: '90vh', overflowY: 'auto' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
                 <h2>{editingCampaign ? 'Update Campaign' : 'Configure New Campaign'}</h2>

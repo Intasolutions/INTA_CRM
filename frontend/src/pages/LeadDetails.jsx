@@ -40,9 +40,13 @@ const LeadDetails = () => {
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [reminderNote, setReminderNote] = useState('');
   const [reminderDate, setReminderDate] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
   useEffect(() => {
     fetchData();
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [id]);
 
   const fetchData = async () => {
@@ -249,19 +253,19 @@ const LeadDetails = () => {
 
   return (
     <div className="page-container" style={{ maxWidth: '1400px', margin: '0 auto' }}>
-      <div className="page-header-responsive" style={{ marginBottom: '32px' }}>
+      <div className="page-header-responsive" style={{ marginBottom: isMobile ? '24px' : '32px' }}>
         <button 
           onClick={() => navigate('/leads')}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: '600', border: '1px solid var(--border-color)', transition: 'all 0.2s' }}
+          style={{ flex: isMobile ? 1 : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: isMobile ? '10px 16px' : '8px 16px', borderRadius: isMobile ? '12px' : '20px', fontSize: '14px', fontWeight: '600', border: '1px solid var(--border-color)', transition: 'all 0.2s' }}
         >
-          <ArrowLeft size={16} /> Back to Leads
+          <ArrowLeft size={16} /> {isMobile ? 'Back' : 'Back to Leads'}
         </button>
         
-        <div style={{ display: 'flex', gap: '12px', position: 'relative' }}>
+        <div style={{ display: 'flex', gap: '12px', position: 'relative', flex: isMobile ? 1 : 'none' }}>
           <button 
             className="btn-secondary" 
             onClick={() => setShowOptions(!showOptions)}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '12px' }}
+            style={{ width: isMobile ? '100% ' : 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: isMobile ? '10px 16px' : '8px 16px', borderRadius: '12px' }}
           >
             <MoreVertical size={18} /> Options
           </button>
@@ -729,14 +733,14 @@ const LeadDetails = () => {
                 <Clock size={18} color="var(--text-secondary)" /> {activeTab === 'activity' ? 'Interaction History' : 'Audit Trail'}
               </h3>
               
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', maxWidth: isMobile ? 'calc(100vw - 40px)' : 'none' }}>
                 <button 
                   onClick={() => setActiveTab('activity')}
                   style={{ 
                     padding: '6px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
                     background: activeTab === 'activity' ? 'var(--brand-blue)' : 'var(--bg-tertiary)',
                     color: activeTab === 'activity' ? 'white' : 'var(--text-secondary)',
-                    border: 'none', cursor: 'pointer', textTransform: 'uppercase'
+                    border: 'none', cursor: 'pointer', textTransform: 'uppercase', whiteSpace: 'nowrap'
                   }}
                 >
                   Interactions
@@ -747,7 +751,7 @@ const LeadDetails = () => {
                     padding: '6px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
                     background: activeTab === 'audit' ? 'var(--brand-blue)' : 'var(--bg-tertiary)',
                     color: activeTab === 'audit' ? 'white' : 'var(--text-secondary)',
-                    border: 'none', cursor: 'pointer', textTransform: 'uppercase'
+                    border: 'none', cursor: 'pointer', textTransform: 'uppercase', whiteSpace: 'nowrap'
                   }}
                 >
                   Audit
@@ -758,7 +762,7 @@ const LeadDetails = () => {
                     padding: '6px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
                     background: activeTab === 'calls' ? 'var(--brand-blue)' : 'var(--bg-tertiary)',
                     color: activeTab === 'calls' ? 'white' : 'var(--text-secondary)',
-                    border: 'none', cursor: 'pointer', textTransform: 'uppercase'
+                    border: 'none', cursor: 'pointer', textTransform: 'uppercase', whiteSpace: 'nowrap'
                   }}
                 >
                   Calls

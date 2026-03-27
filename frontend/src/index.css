@@ -20,13 +20,15 @@
   --transition: all 0.2s ease;
 }
 
-.page-container {
-  padding: 40px;
-}
-
 @media (max-width: 1024px) {
   .page-container {
     padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-container {
+    padding: 16px;
   }
 }
 
@@ -216,17 +218,26 @@ button {
   gap: 32px;
 }
 
-.page-header-responsive {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .page-header-responsive {
     flex-direction: column;
     align-items: stretch !important;
-    gap: 24px !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+  }
+  
+  .page-header-responsive h1 {
+    font-size: 24px !important;
+  }
+  
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  
+  .mobile-full {
+    width: 100% !important;
   }
 }
 
@@ -234,12 +245,21 @@ button {
   main {
     padding: 16px !important;
   }
+  
+  .glass-card {
+    padding: 16px !important;
+    border-radius: var(--radius-sm) !important;
+  }
 
   .btn-primary, .btn-secondary {
     padding: 10px 16px;
     font-size: 14px;
     width: 100%;
     justify-content: center;
+  }
+  
+  .dashboard-grid {
+    gap: 16px !important;
   }
 
   .mobile-hide {

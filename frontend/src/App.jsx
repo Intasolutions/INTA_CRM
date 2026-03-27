@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
-import { LayoutDashboard, Users, Settings as SettingsIcon, LogOut, Trello, Database, Megaphone, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, Settings as SettingsIcon, LogOut, Trello, Database, Megaphone, BarChart3, Menu, X } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Leads from './pages/Leads';
@@ -73,11 +73,9 @@ const ProtectedLayout = ({ children }) => {
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          style={{ padding: '8px', background: 'var(--bg-tertiary)', borderRadius: '8px' }}
+          style={{ padding: '8px', background: 'var(--bg-tertiary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <div style={{ width: '20px', height: '2px', background: 'var(--brand-blue)', marginBottom: '4px' }}></div>
-          <div style={{ width: '20px', height: '2px', background: 'var(--brand-blue)', marginBottom: '4px' }}></div>
-          <div style={{ width: '20px', height: '2px', background: 'var(--brand-blue)' }}></div>
+          {isMobileMenuOpen ? <X size={24} color="var(--brand-blue)" /> : <Menu size={24} color="var(--brand-blue)" />}
         </button>
       </div>
 

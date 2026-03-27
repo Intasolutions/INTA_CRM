@@ -190,15 +190,15 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card"
+            className="glass-card mobile-stack"
             style={{ 
-              marginBottom: '40px', 
-              padding: '24px 32px', 
+              marginBottom: isMobile ? '24px' : '40px', 
+              padding: isMobile ? '20px' : '24px 32px', 
               background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%)',
               border: '1px solid rgba(139, 92, 246, 0.15)',
               display: 'flex',
-              alignItems: 'center',
-              gap: '24px',
+              alignItems: isMobile ? 'stretch' : 'center',
+              gap: isMobile ? '16px' : '24px',
               position: 'relative',
               overflow: 'hidden'
             }}
@@ -234,10 +234,12 @@ const Dashboard = () => {
             
             <button 
               onClick={() => navigate('/tasks')}
+              className="btn-secondary mobile-full"
               style={{ 
                 zIndex: 1,
                 display: 'flex', 
                 alignItems: 'center', 
+                justifyContent: 'center',
                 gap: '10px', 
                 padding: '12px 20px', 
                 background: 'white', 
